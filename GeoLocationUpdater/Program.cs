@@ -10,6 +10,7 @@ namespace GeoLocationUpdater
 	class Program
 	{
 		private static SforceService sforceSvc { get; set; }
+		private static LoginResult loginResult { get; set; }
 
 		static void Main(string[] args)
 		{
@@ -39,7 +40,18 @@ namespace GeoLocationUpdater
 					sforceSvc = new SforceService();
 				}
 
-				sforceSvc.login(userName, password);
+				loginResult = sforceSvc.login(userName, password);
+
+				if (loginResult != null)
+				{
+					sforceSvc.Url = loginResult.serverUrl;
+
+					SessionHeader sessionHeader = new SessionHeader();
+
+					sessionHeader.sessionId = loginResult.sessionId;
+
+					sforceSvc.SessionHeaderValue = sessionHeader;
+				}
 			}
 			catch (Exception ex)
 			{
@@ -71,7 +83,13 @@ namespace GeoLocationUpdater
 
 				var results = sforceSvc.query(soqlQuery);
 
-				Console.WriteLine(results.ToString());
+				if (results != null)
+				{
+					foreach (Account acct in results.records)
+					{
+						Console.WriteLine(acct.Name);
+					}
+				}
 			}
 			catch(Exception ex)
 			{
